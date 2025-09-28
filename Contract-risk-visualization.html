@@ -1,0 +1,2597 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional Crypto Trading Risk Management System V2.5</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2962ff;
+            --secondary: #0039cb;
+            --dark-bg: #121826;
+            --dark-card: #1d2433;
+            --success: #00c853;
+            --danger: #ff3d00;
+            --warning: #ffab00;
+            --info: #00b0ff;
+            --text: #e0e0e0;
+            --text-secondary: #a0a0a0;
+            --long: #00c853;
+            --short: #ff3d00;
+            --border: #2a3441;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--dark-bg) 0%, #0d1117 100%);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 30px 0;
+            background: var(--dark-card);
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        .language-switcher {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .lang-btn {
+            padding: 8px 15px;
+            background: var(--dark-bg);
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .lang-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .lang-btn:hover:not(.active) {
+            background: var(--secondary);
+            color: white;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--info));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .account-info {
+            background: linear-gradient(135deg, var(--dark-card), var(--dark-bg));
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            border: 1px solid var(--border);
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .account-stat {
+            text-align: center;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .account-stat .label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+
+        .account-stat .value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--text);
+        }
+
+        .account-stat.primary .value {
+            color: var(--primary);
+        }
+
+        .account-stat.success .value {
+            color: var(--success);
+        }
+
+        .account-stat.warning .value {
+            color: var(--warning);
+        }
+
+        .account-stat.danger .value {
+            color: var(--danger);
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 1200px) {
+            .grid-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--dark-card);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid var(--border);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .card h2 {
+            color: var(--primary);
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card h3 {
+            color: var(--info);
+            margin: 20px 0 15px;
+            font-size: 1.2rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            background: var(--dark-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(41, 98, 255, 0.1);
+        }
+
+        .input-with-percent {
+            position: relative;
+        }
+
+        .input-with-percent input {
+            padding-right: 145px;
+        }
+
+        .percent-buttons {
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            gap: 5px;
+        }
+
+        .percent-btn {
+            padding: 5px 10px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .percent-btn:hover {
+            background: var(--secondary);
+        }
+
+        .direction-toggle {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .direction-btn {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+            font-weight: 600;
+        }
+
+        .long-btn {
+            background: rgba(0, 200, 83, 0.1);
+            color: var(--long);
+        }
+
+        .long-btn.active {
+            background: var(--long);
+            color: white;
+            border-color: var(--long);
+        }
+
+        .short-btn {
+            background: rgba(255, 61, 0, 0.1);
+            color: var(--short);
+        }
+
+        .short-btn.active {
+            background: var(--short);
+            color: white;
+            border-color: var(--short);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(41, 98, 255, 0.3);
+        }
+
+        .btn-calculate {
+            background: linear-gradient(135deg, var(--primary), var(--info));
+            color: white;
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1rem;
+            margin-top: 10px;
+        }
+
+        .btn-reset {
+            background: var(--danger);
+            color: white;
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1rem;
+            margin-top: 10px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn-group button {
+            flex: 1;
+        }
+
+        .orders-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            overflow-x: auto;
+            display: block;
+        }
+
+        .orders-table table {
+            width: 100%;
+        }
+
+        .orders-table th {
+            background: var(--dark-bg);
+            padding: 12px;
+            text-align: left;
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 0.9rem;
+            border-bottom: 2px solid var(--border);
+            white-space: nowrap;
+        }
+
+        .orders-table td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text);
+            white-space: nowrap;
+        }
+
+        .orders-table tr:hover {
+            background: rgba(41, 98, 255, 0.05);
+        }
+
+        .liquidation-prices {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .liq-price {
+            font-size: 0.85rem;
+        }
+
+        .liq-isolated {
+            color: var(--warning);
+        }
+
+        .liq-cross {
+            color: var(--danger);
+        }
+
+        .tag {
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .tag-long {
+            background: rgba(0, 200, 83, 0.2);
+            color: var(--long);
+        }
+
+        .tag-short {
+            background: rgba(255, 61, 0, 0.2);
+            color: var(--short);
+        }
+
+        .btn-delete {
+            background: var(--danger);
+            color: white;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .btn-edit {
+            background: var(--info);
+            color: white;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            margin-right: 5px;
+        }
+
+        .risk-indicators {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .indicator {
+            background: var(--dark-bg);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .indicator .label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        .indicator .value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--text);
+        }
+
+        .indicator .description {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            margin-top: 5px;
+        }
+
+        .indicator.danger .value {
+            color: var(--danger);
+        }
+
+        .indicator.warning .value {
+            color: var(--warning);
+        }
+
+        .indicator.success .value {
+            color: var(--success);
+        }
+
+        .chart-container {
+            margin-top: 30px;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 300px;
+            margin-top: 20px;
+        }
+
+        .recommendations {
+            background: var(--dark-bg);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .recommendation-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .recommendation-list li {
+            padding: 12px;
+            margin-bottom: 10px;
+            background: var(--dark-card);
+            border-left: 4px solid var(--warning);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .recommendation-list li.success {
+            border-left-color: var(--success);
+        }
+
+        .recommendation-list li.danger {
+            border-left-color: var(--danger);
+        }
+
+        .recommendation-list li.info {
+            border-left-color: var(--info);
+        }
+
+        .note {
+            background: var(--dark-card);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid var(--border);
+            margin-top: 30px;
+        }
+
+        .note h4 {
+            color: var(--warning);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .note ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .note li {
+            padding: 8px 0;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .note li:before {
+            content: "•";
+            color: var(--primary);
+            font-weight: bold;
+            font-size: 1.2rem;
+            line-height: 1;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: var(--dark-card);
+            margin: 5% auto;
+            padding: 30px;
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h3 {
+            color: var(--primary);
+            margin: 0;
+        }
+
+        .close {
+            color: var(--text-secondary);
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .close:hover {
+            color: var(--danger);
+        }
+
+        .alert-box {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            max-width: 400px;
+            z-index: 2000;
+        }
+
+        .alert {
+            background: var(--dark-card);
+            border-left: 4px solid;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideIn 0.3s ease;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .alert.success {
+            border-left-color: var(--success);
+        }
+
+        .alert.danger {
+            border-left-color: var(--danger);
+        }
+
+        .alert.warning {
+            border-left-color: var(--warning);
+        }
+
+        .alert.info {
+            border-left-color: var(--info);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
+        .advanced-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .metric-card {
+            background: var(--dark-bg);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .metric-card .metric-label {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin-bottom: 5px;
+        }
+
+        .metric-card .metric-value {
+            color: var(--text);
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--dark-bg);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--success), var(--warning), var(--danger));
+            transition: width 0.3s ease;
+        }
+
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: help;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 250px;
+            background-color: var(--dark-bg);
+            color: var(--text);
+            text-align: left;
+            border-radius: 6px;
+            padding: 10px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -125px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            border: 1px solid var(--border);
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .export-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .export-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .export-buttons button {
+            flex: 1;
+            min-width: 120px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="language-switcher">
+                <button class="lang-btn active" id="langZh" onclick="setLanguage('zh')">中文</button>
+                <button class="lang-btn" id="langEn" onclick="setLanguage('en')">English</button>
+            </div>
+            <h1><i class="fas fa-coins"></i> <span data-i18n="title">专业数字货币交易风控系统 V2.5</span></h1>
+            <p class="subtitle" data-i18n="subtitle">精准计算强平价格 · 全方位风险评估 · 智能仓位管理建议</p>
+        </header>
+
+        <div class="alert-box" id="alertBox"></div>
+
+        <!-- 账户信息展示 -->
+        <div class="account-info" id="accountInfo">
+            <div class="account-stat primary">
+                <div class="label" data-i18n="totalCapital">账户总资金</div>
+                <div class="value" id="displayCapital">$10,000</div>
+            </div>
+            <div class="account-stat success">
+                <div class="label" data-i18n="availableBalance">可用余额</div>
+                <div class="value" id="availableBalance">$10,000</div>
+            </div>
+            <div class="account-stat warning">
+                <div class="label" data-i18n="usedMargin">已用保证金</div>
+                <div class="value" id="usedMargin">$0</div>
+            </div>
+            <div class="account-stat">
+                <div class="label" data-i18n="unrealizedPnL">未实现盈亏</div>
+                <div class="value" id="unrealizedPnL">$0</div>
+            </div>
+            <div class="account-stat danger">
+                <div class="label" data-i18n="riskLevel">风险度</div>
+                <div class="value" id="riskLevel">0%</div>
+            </div>
+        </div>
+
+        <div class="grid-container">
+            <!-- 输入区域 -->
+            <div class="card">
+                <h2><i class="fas fa-sliders-h"></i> <span data-i18n="tradingParams">交易参数设置</span></h2>
+
+                <div class="form-group">
+                    <label for="capital" data-i18n="capitalLabel">账户总资金 (USDT)</label>
+                    <input type="number" id="capital" value="10000" min="0" step="100" onchange="updateAccountInfo()">
+                </div>
+
+                <div class="form-group">
+                    <label for="riskTolerance">
+                        <span data-i18n="riskPreference">风险偏好</span>
+                        <span class="tooltip">
+                            <i class="fas fa-info-circle"></i>
+                            <span class="tooltiptext" data-i18n="riskTooltip">
+                                保守型：单笔风险1%，总仓位不超过20%<br>
+                                稳健型：单笔风险2%，总仓位不超过30%<br>
+                                激进型：单笔风险3%，总仓位不超过50%
+                            </span>
+                        </span>
+                    </label>
+                    <select id="riskTolerance">
+                        <option value="conservative" data-i18n="conservative">保守型</option>
+                        <option value="moderate" selected data-i18n="moderate">稳健型</option>
+                        <option value="aggressive" data-i18n="aggressive">激进型</option>
+                    </select>
+                </div>
+
+                <h3><i class="fas fa-plus-circle"></i> <span data-i18n="addNewOrder">添加新订单</span></h3>
+
+                <div class="direction-toggle">
+                    <div class="direction-btn long-btn active" id="longBtn">
+                        <i class="fas fa-arrow-up"></i> <span data-i18n="long">做多 Long</span>
+                    </div>
+                    <div class="direction-btn short-btn" id="shortBtn">
+                        <i class="fas fa-arrow-down"></i> <span data-i18n="short">做空 Short</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="coin" data-i18n="tradingPair">交易对</label>
+                    <input type="text" id="coin" placeholder="例如: BTC/USDT" value="BTC/USDT">
+                </div>
+
+                <div class="form-group">
+                    <label for="leverage">
+                        <span data-i18n="leverage">杠杆倍数</span>
+                        <span class="tooltip">
+                            <i class="fas fa-info-circle"></i>
+                            <span class="tooltiptext" data-i18n="leverageTooltip">
+                                杠杆越高，强平价格越接近开仓价格。<br>
+                                建议新手使用5倍以下杠杆。
+                            </span>
+                        </span>
+                    </label>
+                    <input type="number" id="leverage" value="10" min="1" max="125" step="1">
+                </div>
+
+                <div class="form-group">
+                    <label for="entry" data-i18n="entryPrice">开仓价格 (USDT)</label>
+                    <input type="number" id="entry" placeholder="输入计划开仓价格" step="0.01">
+                </div>
+
+                <div class="form-group">
+                    <label for="stopLoss" data-i18n="stopLossPrice">止损价格 (USDT)</label>
+                    <input type="number" id="stopLoss" placeholder="输入止损价格" step="0.01">
+                </div>
+
+                <div class="form-group">
+                    <label for="takeProfit" data-i18n="takeProfitPrice">止盈价格 (USDT)</label>
+                    <input type="number" id="takeProfit" placeholder="输入止盈价格" step="0.01">
+                </div>
+
+                <div class="form-group">
+                    <label for="margin" data-i18n="marginLabel">投入保证金 (USDT)</label>
+                    <div class="input-with-percent">
+                        <input type="number" id="margin" placeholder="输入保证金金额" step="1">
+                        <div class="percent-buttons">
+                            <button class="percent-btn" onclick="setMarginByRisk()" data-i18n="riskCalc">风控计算</button>
+                            <button class="percent-btn" onclick="setMarginPercent(10)">10%</button>
+                            <button class="percent-btn" onclick="setMarginPercent(20)">20%</button>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" id="addOrderBtn" style="width: 100%;">
+                    <i class="fas fa-plus"></i> <span data-i18n="addOrder">添加订单</span>
+                </button>
+
+                <!-- 订单列表 -->
+                <div class="orders-list" style="margin-top: 30px;">
+                    <h3><i class="fas fa-list"></i> <span data-i18n="currentOrders">当前订单列表</span></h3>
+                    <div class="orders-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th data-i18n="thPair">交易对</th>
+                                    <th data-i18n="thDirection">方向</th>
+                                    <th data-i18n="thLeverage">杠杆</th>
+                                    <th data-i18n="thEntry">开仓价</th>
+                                    <th data-i18n="thStopLoss">止损价</th>
+                                    <th data-i18n="thTakeProfit">止盈价</th>
+                                    <th data-i18n="thMargin">保证金</th>
+                                    <th data-i18n="thLiqPrice">强平价格</th>
+                                    <th data-i18n="thActions">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ordersTableBody">
+                                <tr><td colspan="9" style="text-align: center; color: #a0a0a0;" data-i18n="noOrders">暂无订单</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="btn-group">
+                    <button class="btn btn-calculate" id="calculateBtn">
+                        <i class="fas fa-calculator"></i> <span data-i18n="calculateRisk">计算综合风险</span>
+                    </button>
+                    <button class="btn btn-reset" id="resetBtn">
+                        <i class="fas fa-redo"></i> <span data-i18n="resetAll">重置所有</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 结果展示区域 -->
+            <div class="card">
+                <h2><i class="fas fa-chart-line"></i> <span data-i18n="riskDashboard">风险分析仪表板</span></h2>
+
+                <!-- 主要风险指标 -->
+                <div class="risk-indicators">
+                    <div class="indicator" id="totalMarginIndicator">
+                        <div class="label" data-i18n="totalMargin">总保证金</div>
+                        <div class="value">0 USDT</div>
+                        <div class="description"><span data-i18n="percentOfCapital">占总资金</span>: 0%</div>
+                    </div>
+                    <div class="indicator" id="marginRatioIndicator">
+                        <div class="label" data-i18n="marginUsage">保证金使用率</div>
+                        <div class="value">0%</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="marginProgress" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="indicator" id="totalExposureIndicator">
+                        <div class="label" data-i18n="totalExposure">总持仓价值</div>
+                        <div class="value">0 USDT</div>
+                        <div class="description" data-i18n="leveragedValue">杠杆后价值</div>
+                    </div>
+                    <div class="indicator" id="maxLossIndicator">
+                        <div class="label" data-i18n="maxPotentialLoss">最大潜在损失</div>
+                        <div class="value">0 USDT</div>
+                        <div class="description"><span data-i18n="percentOfCapital">占总资金</span>: 0%</div>
+                    </div>
+                </div>
+
+                <!-- 高级风险指标 -->
+                <h3><i class="fas fa-tachometer-alt"></i> <span data-i18n="advancedMetrics">高级风险指标</span></h3>
+                <div class="advanced-metrics" id="advancedMetrics">
+                    <div class="metric-card">
+                        <div class="metric-label" data-i18n="var95">风险价值 (VaR 95%)</div>
+                        <div class="metric-value" id="varValue">-</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label" data-i18n="maxDrawdown">最大回撤</div>
+                        <div class="metric-value" id="maxDrawdown">-</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label" data-i18n="profitLossRatio">盈亏比</div>
+                        <div class="metric-value" id="profitLossRatio">-</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label" data-i18n="fixedFraction">固定比例建议</div>
+                        <div class="metric-value" id="fixedFractionSuggestion">-</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label" data-i18n="correlationRisk">相关性风险</div>
+                        <div class="metric-value" id="correlationRisk">-</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label" data-i18n="riskAdjustedReturn">风险调整收益</div>
+                        <div class="metric-value" id="riskAdjustedReturn">-</div>
+                    </div>
+                </div>
+
+                <!-- 图表区域 -->
+                <div class="chart-container">
+                    <h3><i class="fas fa-chart-pie"></i> <span data-i18n="capitalDistribution">资金分布</span></h3>
+                    <div class="chart-wrapper">
+                        <canvas id="positionChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <h3><i class="fas fa-chart-bar"></i> <span data-i18n="riskExposure">风险敞口分析</span></h3>
+                    <div class="chart-wrapper">
+                        <canvas id="riskChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- 智能建议 -->
+                <div class="recommendations">
+                    <h3><i class="fas fa-lightbulb"></i> <span data-i18n="smartAdvice">智能风控建议</span></h3>
+                    <div id="riskRecommendations">
+                        <ul class="recommendation-list">
+                            <li class="success" data-i18n="systemReady">系统就绪，请添加订单进行分析</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 导出功能 -->
+                <div class="export-section">
+                    <h3><i class="fas fa-download"></i> <span data-i18n="dataExport">数据导出</span></h3>
+                    <div class="export-buttons">
+                        <button class="btn btn-primary" onclick="exportToJSON()">
+                            <i class="fas fa-file-code"></i> <span data-i18n="exportJSON">导出JSON</span>
+                        </button>
+                        <button class="btn btn-primary" onclick="exportToCSV()">
+                            <i class="fas fa-file-csv"></i> <span data-i18n="exportCSV">导出CSV</span>
+                        </button>
+                        <button class="btn btn-primary" onclick="saveToLocal()">
+                            <i class="fas fa-save"></i> <span data-i18n="saveLocal">保存到本地</span>
+                        </button>
+                        <button class="btn btn-primary" onclick="loadFromLocal()">
+                            <i class="fas fa-upload"></i> <span data-i18n="loadLocal">加载本地数据</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 说明文档 -->
+        <div class="note">
+            <h4><i class="fas fa-book"></i> <span data-i18n="userGuide">使用说明与风险提示</span></h4>
+            <ul>
+                <li data-i18n="note1"><strong>强平价格计算：</strong>逐仓模式基于单个仓位保证金，全仓模式考虑账户总资金</li>
+                <li data-i18n="note2"><strong>风险价值(VaR)：</strong>在95%置信水平下，您的最大可能损失金额</li>
+                <li data-i18n="note3"><strong>盈亏比：</strong>潜在盈利与潜在亏损的比率，建议保持在1.5以上</li>
+                <li data-i18n="note4"><strong>固定比例法：</strong>基于账户风险承受能力的仓位管理方法，每笔交易风险固定为账户的1%-3%</li>
+                <li data-i18n="note5"><strong>相关性风险：</strong>评估持仓集中度和方向一致性风险</li>
+                <li data-i18n="note6"><strong>建议原则：</strong>总保证金不超过账户资金的30%，单笔损失不超过总资金的2%</li>
+                <li data-i18n="note7"><strong>重要提醒：</strong>加密货币交易风险极高，请谨慎操作，切勿过度杠杆</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 编辑订单模态框 -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 data-i18n="editOrder">编辑订单</h3>
+                <span class="close" id="closeModalBtn">&times;</span>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editOrderId">
+                <div class="form-group">
+                    <label for="editCoin" data-i18n="tradingPair">交易对</label>
+                    <input type="text" id="editCoin">
+                </div>
+                <div class="form-group">
+                    <label for="editLeverage" data-i18n="leverage">杠杆倍数</label>
+                    <input type="number" id="editLeverage" min="1" max="125">
+                </div>
+                <div class="form-group">
+                    <label for="editEntry" data-i18n="entryPrice">开仓价格</label>
+                    <input type="number" id="editEntry" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label for="editStopLoss" data-i18n="stopLossPrice">止损价格</label>
+                    <input type="number" id="editStopLoss" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label for="editTakeProfit" data-i18n="takeProfitPrice">止盈价格</label>
+                    <input type="number" id="editTakeProfit" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label for="editMargin" data-i18n="marginLabel">保证金</label>
+                    <input type="number" id="editMargin" step="1">
+                </div>
+                <button class="btn btn-primary" onclick="saveEditOrder()" style="width: 100%;">
+                    <i class="fas fa-save"></i> <span data-i18n="saveChanges">保存修改</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 语言包
+        const translations = {
+            zh: {
+                // Header
+                title: "专业数字货币交易风控系统 V2.5",
+                subtitle: "精准计算强平价格 · 全方位风险评估 · 智能仓位管理建议",
+                
+                // Account Info
+                totalCapital: "账户总资金",
+                availableBalance: "可用余额",
+                usedMargin: "已用保证金",
+                unrealizedPnL: "未实现盈亏",
+                riskLevel: "风险度",
+                
+                // Trading Parameters
+                tradingParams: "交易参数设置",
+                capitalLabel: "账户总资金 (USDT)",
+                riskPreference: "风险偏好",
+                riskTooltip: "保守型：单笔风险1%，总仓位不超过20%<br>稳健型：单笔风险2%，总仓位不超过30%<br>激进型：单笔风险3%，总仓位不超过50%",
+                conservative: "保守型",
+                moderate: "稳健型",
+                aggressive: "激进型",
+                
+                // Add Order
+                addNewOrder: "添加新订单",
+                long: "做多 Long",
+                short: "做空 Short",
+                tradingPair: "交易对",
+                leverage: "杠杆倍数",
+                leverageTooltip: "杠杆越高，强平价格越接近开仓价格。<br>建议新手使用5倍以下杠杆。",
+                entryPrice: "开仓价格 (USDT)",
+                stopLossPrice: "止损价格 (USDT)",
+                takeProfitPrice: "止盈价格 (USDT)",
+                marginLabel: "投入保证金 (USDT)",
+                riskCalc: "风控计算",
+                addOrder: "添加订单",
+                
+                // Orders Table
+                currentOrders: "当前订单列表",
+                thPair: "交易对",
+                thDirection: "方向",
+                thLeverage: "杠杆",
+                thEntry: "开仓价",
+                thStopLoss: "止损价",
+                thTakeProfit: "止盈价",
+                thMargin: "保证金",
+                thLiqPrice: "强平价格",
+                thActions: "操作",
+                noOrders: "暂无订单",
+                
+                // Buttons
+                calculateRisk: "计算综合风险",
+                resetAll: "重置所有",
+                
+                // Risk Dashboard
+                riskDashboard: "风险分析仪表板",
+                totalMargin: "总保证金",
+                marginUsage: "保证金使用率",
+                totalExposure: "总持仓价值",
+                leveragedValue: "杠杆后价值",
+                maxPotentialLoss: "最大潜在损失",
+                percentOfCapital: "占总资金",
+                
+                // Advanced Metrics
+                advancedMetrics: "高级风险指标",
+                var95: "风险价值 (VaR 95%)",
+                maxDrawdown: "最大回撤",
+                profitLossRatio: "盈亏比",
+                fixedFraction: "固定比例建议",
+                correlationRisk: "相关性风险",
+                riskAdjustedReturn: "风险调整收益",
+                
+                // Charts
+                capitalDistribution: "资金分布",
+                riskExposure: "风险敞口分析",
+                
+                // Recommendations
+                smartAdvice: "智能风控建议",
+                systemReady: "系统就绪，请添加订单进行分析",
+                
+                // Export
+                dataExport: "数据导出",
+                exportJSON: "导出JSON",
+                exportCSV: "导出CSV",
+                saveLocal: "保存到本地",
+                loadLocal: "加载本地数据",
+                
+                // User Guide
+                userGuide: "使用说明与风险提示",
+                note1: "强平价格计算：逐仓模式基于单个仓位保证金，全仓模式考虑账户总资金",
+                note2: "风险价值(VaR)：在95%置信水平下，您的最大可能损失金额",
+                note3: "盈亏比：潜在盈利与潜在亏损的比率，建议保持在1.5以上",
+                note4: "固定比例法：基于账户风险承受能力的仓位管理方法，每笔交易风险固定为账户的1%-3%",
+                note5: "相关性风险：评估持仓集中度和方向一致性风险",
+                note6: "建议原则：总保证金不超过账户资金的30%，单笔损失不超过总资金的2%",
+                note7: "重要提醒：加密货币交易风险极高，请谨慎操作，切勿过度杠杆",
+                
+                // Edit Modal
+                editOrder: "编辑订单",
+                saveChanges: "保存修改",
+                
+                // Alerts
+                fillRequired: "请填写所有必填字段",
+                marginExceedsBalance: "保证金超过可用余额！",
+                leverageWarning: "当前风险偏好下，建议杠杆不超过{0}倍",
+                marginExceedsLimit: "总保证金将超过风险限制({0}%)",
+                orderAdded: "订单添加成功",
+                orderDeleted: "订单已删除",
+                orderUpdated: "订单已更新",
+                dataExported: "数据已导出",
+                dataSaved: "数据已保存到本地存储",
+                dataLoaded: "数据已从本地存储加载",
+                noData: "没有可导出的数据",
+                resetConfirm: "确定要重置所有数据吗？此操作不可撤销。",
+                dataReset: "所有数据已重置",
+                deleteConfirm: "确定要删除这个订单吗？"
+            },
+            en: {
+                // Header
+                title: "Professional Crypto Trading Risk Management System V2.5",
+                subtitle: "Accurate Liquidation Price · Comprehensive Risk Assessment · Smart Position Management",
+                
+                // Account Info
+                totalCapital: "Total Capital",
+                availableBalance: "Available Balance",
+                usedMargin: "Used Margin",
+                unrealizedPnL: "Unrealized P&L",
+                riskLevel: "Risk Level",
+                
+                // Trading Parameters
+                tradingParams: "Trading Parameters",
+                capitalLabel: "Total Capital (USDT)",
+                riskPreference: "Risk Preference",
+                riskTooltip: "Conservative: 1% risk per trade, max 20% position<br>Moderate: 2% risk per trade, max 30% position<br>Aggressive: 3% risk per trade, max 50% position",
+                conservative: "Conservative",
+                moderate: "Moderate",
+                aggressive: "Aggressive",
+                
+                // Add Order
+                addNewOrder: "Add New Order",
+                long: "Long",
+                short: "Short",
+                tradingPair: "Trading Pair",
+                leverage: "Leverage",
+                leverageTooltip: "Higher leverage means liquidation price closer to entry.<br>Beginners should use leverage below 5x.",
+                entryPrice: "Entry Price (USDT)",
+                stopLossPrice: "Stop Loss Price (USDT)",
+                takeProfitPrice: "Take Profit Price (USDT)",
+                marginLabel: "Margin (USDT)",
+                riskCalc: "Risk Calc",
+                addOrder: "Add Order",
+                
+                // Orders Table
+                currentOrders: "Current Orders",
+                thPair: "Pair",
+                thDirection: "Direction",
+                thLeverage: "Leverage",
+                thEntry: "Entry",
+                thStopLoss: "Stop Loss",
+                thTakeProfit: "Take Profit",
+                thMargin: "Margin",
+                thLiqPrice: "Liq. Price",
+                thActions: "Actions",
+                noOrders: "No orders",
+                
+                // Buttons
+                calculateRisk: "Calculate Risk",
+                resetAll: "Reset All",
+                
+                // Risk Dashboard
+                riskDashboard: "Risk Analysis Dashboard",
+                totalMargin: "Total Margin",
+                marginUsage: "Margin Usage",
+                totalExposure: "Total Exposure",
+                leveragedValue: "Leveraged Value",
+                maxPotentialLoss: "Max Potential Loss",
+                percentOfCapital: "% of Capital",
+                
+                // Advanced Metrics
+                advancedMetrics: "Advanced Risk Metrics",
+                var95: "Value at Risk (95%)",
+                maxDrawdown: "Max Drawdown",
+                profitLossRatio: "Profit/Loss Ratio",
+                fixedFraction: "Fixed Fraction Advice",
+                correlationRisk: "Correlation Risk",
+                riskAdjustedReturn: "Risk-Adjusted Return",
+                
+                // Charts
+                capitalDistribution: "Capital Distribution",
+                riskExposure: "Risk Exposure Analysis",
+                
+                // Recommendations
+                smartAdvice: "Smart Risk Advice",
+                systemReady: "System ready, please add orders to analyze",
+                
+                // Export
+                dataExport: "Data Export",
+                exportJSON: "Export JSON",
+                exportCSV: "Export CSV",
+                saveLocal: "Save Local",
+                loadLocal: "Load Local",
+                
+                // User Guide
+                userGuide: "User Guide & Risk Warning",
+                note1: "Liquidation Price: Isolated based on position margin, Cross considers total capital",
+                note2: "Value at Risk: Maximum possible loss at 95% confidence level",
+                note3: "P/L Ratio: Ratio of potential profit to loss, keep above 1.5",
+                note4: "Fixed Fraction: Position sizing based on 1%-3% risk per trade",
+                note5: "Correlation Risk: Evaluates position concentration and directional bias",
+                note6: "Principles: Total margin <30% of capital, single loss <2% of total",
+                note7: "Warning: Crypto trading is high risk, trade carefully, avoid overleveraging",
+                
+                // Edit Modal
+                editOrder: "Edit Order",
+                saveChanges: "Save Changes",
+                
+                // Alerts
+                fillRequired: "Please fill all required fields",
+                marginExceedsBalance: "Margin exceeds available balance!",
+                leverageWarning: "Recommended leverage below {0}x for current risk preference",
+                marginExceedsLimit: "Total margin will exceed risk limit ({0}%)",
+                orderAdded: "Order added successfully",
+                orderDeleted: "Order deleted",
+                orderUpdated: "Order updated",
+                dataExported: "Data exported",
+                dataSaved: "Data saved to local storage",
+                dataLoaded: "Data loaded from local storage",
+                noData: "No data to export",
+                resetConfirm: "Reset all data? This cannot be undone.",
+                dataReset: "All data reset",
+                deleteConfirm: "Delete this order?"
+            }
+        };
+
+        // 全局变量
+        let orders = [];
+        let isLong = true;
+        let positionChart = null;
+        let riskChart = null;
+        let currentLang = 'zh';
+
+        // 交易所费率配置
+        const EXCHANGE_CONFIG = {
+            takerFee: 0.0006,
+            makerFee: 0.0002,
+            maintenanceMarginRate: 0.005,
+            fundingRate: 0.0001
+        };
+
+        // 风险偏好配置
+        const RISK_PROFILES = {
+            conservative: {
+                riskPerTrade: 0.01,
+                maxMarginRatio: 0.2,
+                maxLeverage: 5
+            },
+            moderate: {
+                riskPerTrade: 0.02,
+                maxMarginRatio: 0.3,
+                maxLeverage: 10
+            },
+            aggressive: {
+                riskPerTrade: 0.03,
+                maxMarginRatio: 0.5,
+                maxLeverage: 20
+            }
+        };
+
+        // 设置语言
+        function setLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem('language', lang);
+            
+            // 更新按钮状态
+            document.getElementById('langZh').classList.toggle('active', lang === 'zh');
+            document.getElementById('langEn').classList.toggle('active', lang === 'en');
+            
+            // 更新所有文本
+            document.querySelectorAll('[data-i18n]').forEach(element => {
+                const key = element.getAttribute('data-i18n');
+                if (translations[lang][key]) {
+                    element.innerHTML = translations[lang][key];
+                }
+            });
+            
+            // 更新特殊元素
+            updateSpecialElements();
+        }
+
+        // 获取翻译文本
+        function t(key, ...args) {
+            let text = translations[currentLang][key] || key;
+            args.forEach((arg, index) => {
+                text = text.replace(`{${index}}`, arg);
+            });
+            return text;
+        }
+
+        // 更新特殊元素（表格、图表等）
+        function updateSpecialElements() {
+            // 更新订单表格
+            updateOrdersTable();
+            
+            // 更新图表标签
+            if (positionChart) {
+                const capital = parseFloat(document.getElementById('capital').value) || 10000;
+                const totalMargin = orders.reduce((sum, order) => sum + order.margin, 0);
+                const availableBalance = capital - totalMargin;
+                
+                if (orders.length > 0) {
+                    const coinMargins = {};
+                    orders.forEach(order => {
+                        const key = `${order.coin} (${order.direction})`;
+                        coinMargins[key] = (coinMargins[key] || 0) + order.margin;
+                    });
+                    
+                    positionChart.data.labels = [
+                        currentLang === 'zh' ? '可用余额' : 'Available',
+                        ...Object.keys(coinMargins)
+                    ];
+                } else {
+                    positionChart.data.labels = [currentLang === 'zh' ? '可用余额' : 'Available'];
+                }
+                positionChart.update();
+            }
+            
+            if (riskChart) {
+                riskChart.data.datasets[0].label = currentLang === 'zh' ? '潜在损失' : 'Potential Loss';
+                riskChart.data.datasets[1].label = currentLang === 'zh' ? '潜在盈利' : 'Potential Profit';
+                riskChart.update();
+            }
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 加载保存的语言设置
+            const savedLang = localStorage.getItem('language') || 'zh';
+            setLanguage(savedLang);
+                        initEventListeners();
+            initCharts();
+            updateAccountInfo();
+            loadFromLocal(false);
+        });
+
+        // 更新账户信息显示
+        function updateAccountInfo() {
+            const capital = parseFloat(document.getElementById('capital').value) || 0;
+            const totalMargin = orders.reduce((sum, order) => sum + order.margin, 0);
+            const availableBalance = capital - totalMargin;
+            
+            // 计算未实现盈亏（简化版本）
+            let unrealizedPnL = 0;
+            orders.forEach(order => {
+                if (order.currentPrice) {
+                    const pnl = calculateCurrentPnL(order);
+                    unrealizedPnL += pnl;
+                }
+            });
+            
+            // 计算风险度
+            const riskLevel = capital > 0 ? ((totalMargin / capital) * 100).toFixed(1) : 0;
+            
+            // 更新显示
+            document.getElementById('displayCapital').textContent = `$${capital.toLocaleString()}`;
+            document.getElementById('availableBalance').textContent = `$${availableBalance.toLocaleString()}`;
+            document.getElementById('usedMargin').textContent = `$${totalMargin.toLocaleString()}`;
+            document.getElementById('unrealizedPnL').textContent = unrealizedPnL >= 0 
+                ? `+$${unrealizedPnL.toLocaleString()}` 
+                : `-$${Math.abs(unrealizedPnL).toLocaleString()}`;
+            
+            // 风险度颜色
+            const riskLevelElement = document.getElementById('riskLevel');
+            riskLevelElement.textContent = `${riskLevel}%`;
+            riskLevelElement.parentElement.className = 'account-stat';
+            if (riskLevel > 80) {
+                riskLevelElement.parentElement.classList.add('danger');
+            } else if (riskLevel > 50) {
+                riskLevelElement.parentElement.classList.add('warning');
+            } else {
+                riskLevelElement.parentElement.classList.add('success');
+            }
+            
+            // 未实现盈亏颜色
+            const pnlElement = document.getElementById('unrealizedPnL');
+            pnlElement.parentElement.className = 'account-stat';
+            if (unrealizedPnL > 0) {
+                pnlElement.parentElement.classList.add('success');
+            } else if (unrealizedPnL < 0) {
+                pnlElement.parentElement.classList.add('danger');
+            }
+        }
+
+        // 基于风险管理设置保证金（固定比例法）
+        function setMarginByRisk() {
+            const capital = parseFloat(document.getElementById('capital').value) || 0;
+            const entry = parseFloat(document.getElementById('entry').value);
+            const stopLoss = parseFloat(document.getElementById('stopLoss').value);
+            const leverage = parseFloat(document.getElementById('leverage').value);
+            const riskProfile = RISK_PROFILES[document.getElementById('riskTolerance').value];
+            
+            if (!capital || !entry || !stopLoss) {
+                showAlert(t('fillRequired'), 'warning');
+                return;
+            }
+            
+            // 计算止损幅度
+            const stopLossPercentage = Math.abs(entry - stopLoss) / entry;
+            
+            // 根据固定比例法计算仓位
+            const riskAmount = capital * riskProfile.riskPerTrade;
+            const positionSize = riskAmount / stopLossPercentage;
+            
+            // 计算所需保证金
+            const margin = positionSize / leverage;
+            
+            // 设置保证金值
+            document.getElementById('margin').value = Math.min(margin, capital * 0.5).toFixed(2);
+            
+            const message = currentLang === 'zh' 
+                ? `根据固定比例法(${(riskProfile.riskPerTrade * 100).toFixed(0)}%风险)，建议保证金为$${margin.toFixed(2)}`
+                : `Based on fixed fraction (${(riskProfile.riskPerTrade * 100).toFixed(0)}% risk), suggested margin: $${margin.toFixed(2)}`;
+            showAlert(message, 'info');
+        }
+
+        // 设置保证金百分比
+        function setMarginPercent(percent) {
+            const capital = parseFloat(document.getElementById('capital').value) || 0;
+            const marginAmount = (capital * percent / 100).toFixed(2);
+            document.getElementById('margin').value = marginAmount;
+        }
+
+        // 计算当前盈亏
+        function calculateCurrentPnL(order) {
+            if (!order.currentPrice) return 0;
+            
+            const priceChange = order.direction === 'Long'
+                ? (order.currentPrice - order.entry) / order.entry
+                : (order.entry - order.currentPrice) / order.entry;
+            
+            return priceChange * order.positionSize;
+        }
+
+        // 初始化事件监听器
+        function initEventListeners() {
+            // 方向切换
+            document.getElementById('longBtn').addEventListener('click', function() {
+                isLong = true;
+                this.classList.add('active');
+                document.getElementById('shortBtn').classList.remove('active');
+            });
+
+            document.getElementById('shortBtn').addEventListener('click', function() {
+                isLong = false;
+                this.classList.add('active');
+                document.getElementById('longBtn').classList.remove('active');
+            });
+
+            // 添加订单
+            document.getElementById('addOrderBtn').addEventListener('click', addOrder);
+
+            // 计算风险
+            document.getElementById('calculateBtn').addEventListener('click', calculateComprehensiveRisk);
+
+            // 重置
+            document.getElementById('resetBtn').addEventListener('click', resetAll);
+
+            // 模态框
+            document.getElementById('closeModalBtn').addEventListener('click', closeModal);
+
+            // 资金变更监听
+            document.getElementById('capital').addEventListener('input', updateAccountInfo);
+
+            // 自动保存
+            setInterval(autoSave, 30000); // 每30秒自动保存
+
+            // 添加快捷键支持
+            document.addEventListener('keydown', function(e) {
+                // Ctrl/Cmd + S 保存
+                if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                    e.preventDefault();
+                    saveToLocal();
+                }
+                
+                // Ctrl/Cmd + E 导出
+                if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
+                    e.preventDefault();
+                    exportToJSON();
+                }
+                
+                // Esc 关闭模态框
+                if (e.key === 'Escape') {
+                    closeModal();
+                }
+            });
+
+            // 添加离开页面提醒
+            window.addEventListener('beforeunload', function(e) {
+                if (orders.length > 0) {
+                    autoSave();
+                }
+            });
+        }
+
+        // 初始化图表
+        function initCharts() {
+            // 资金分布饼图
+            const positionCtx = document.getElementById('positionChart').getContext('2d');
+            positionChart = new Chart(positionCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: [currentLang === 'zh' ? '可用余额' : 'Available'],
+                    datasets: [{
+                        label: currentLang === 'zh' ? '资金分布' : 'Capital Distribution',
+                        data: [10000],
+                        backgroundColor: ['#4caf50'],
+                        borderColor: '#1d2433',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                color: '#e0e0e0',
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.parsed;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((value / total) * 100).toFixed(2);
+                                    return `${context.label}: $${value.toFixed(2)} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 风险敞口柱状图
+            const riskCtx = document.getElementById('riskChart').getContext('2d');
+            riskChart = new Chart(riskCtx, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: currentLang === 'zh' ? '潜在损失' : 'Potential Loss',
+                        data: [],
+                        backgroundColor: 'rgba(255, 61, 0, 0.6)',
+                        borderColor: '#ff3d00',
+                        borderWidth: 1
+                    }, {
+                        label: currentLang === 'zh' ? '潜在盈利' : 'Potential Profit',
+                        data: [],
+                        backgroundColor: 'rgba(0, 200, 83, 0.6)',
+                        borderColor: '#00c853',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            ticks: {
+                                color: '#e0e0e0'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                color: '#e0e0e0',
+                                callback: function(value) {
+                                    return '$' + value.toFixed(0);
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#e0e0e0'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 修正后的强平价格计算
+        function calculateLiquidationPrice(entryPrice, leverage, direction, margin, capital) {
+            // 验证输入
+            if (!entryPrice || entryPrice <= 0 || !leverage || leverage <= 0) {
+                return { isolated: 0, cross: 0 };
+            }
+
+            const maintainMarginRate = EXCHANGE_CONFIG.maintenanceMarginRate;
+            const feeRate = EXCHANGE_CONFIG.takerFee;
+            
+            let isolatedLiqPrice, crossLiqPrice;
+            
+            // 计算持仓数量
+            const positionSize = margin * leverage / entryPrice;
+            
+            if (direction === 'long' || direction === 'Long') {
+                // 做多逐仓强平价格
+                isolatedLiqPrice = entryPrice * (1 - 1/leverage + maintainMarginRate + feeRate * 2);
+                
+                // 做多全仓强平价格
+                if (capital && capital > 0) {
+                    crossLiqPrice = (entryPrice * positionSize - capital * (1 - maintainMarginRate)) / positionSize;
+                    crossLiqPrice = Math.max(0, crossLiqPrice);
+                } else {
+                    crossLiqPrice = isolatedLiqPrice;
+                }
+            } else {
+                // 做空逐仓强平价格
+                isolatedLiqPrice = entryPrice * (1 + 1/leverage - maintainMarginRate - feeRate * 2);
+                
+                // 做空全仓强平价格
+                if (capital && capital > 0) {
+                    crossLiqPrice = (entryPrice * positionSize + capital * (1 - maintainMarginRate)) / positionSize;
+                } else {
+                    crossLiqPrice = isolatedLiqPrice;
+                }
+            }
+
+            return {
+                isolated: Math.max(0, isolatedLiqPrice),
+                cross: Math.max(0, crossLiqPrice)
+            };
+        }
+
+        // 添加订单
+        function addOrder() {
+            const coin = document.getElementById('coin').value.trim();
+            const leverage = parseFloat(document.getElementById('leverage').value);
+            const entry = parseFloat(document.getElementById('entry').value);
+            const stopLoss = parseFloat(document.getElementById('stopLoss').value);
+            const takeProfit = parseFloat(document.getElementById('takeProfit').value);
+            const margin = parseFloat(document.getElementById('margin').value);
+
+            // 验证输入
+            if (!coin || !leverage || !entry || !margin) {
+                showAlert(t('fillRequired'), 'warning');
+                return;
+            }
+
+            // 获取当前资金和风险配置
+            const capital = parseFloat(document.getElementById('capital').value);
+            const riskProfile = RISK_PROFILES[document.getElementById('riskTolerance').value];
+
+            // 检查资金是否足够
+            const totalUsedMargin = orders.reduce((sum, o) => sum + o.margin, 0);
+            if (totalUsedMargin + margin > capital) {
+                showAlert(t('marginExceedsBalance'), 'danger');
+                return;
+            }
+
+            // 风险检查
+            if (leverage > riskProfile.maxLeverage) {
+                showAlert(t('leverageWarning', riskProfile.maxLeverage), 'warning');
+            }
+
+            if ((totalUsedMargin + margin) / capital > riskProfile.maxMarginRatio) {
+                showAlert(t('marginExceedsLimit', riskProfile.maxMarginRatio * 100), 'danger');
+                return;
+            }
+
+            // 计算强平价格
+            const liquidationPrices = calculateLiquidationPrice(entry, leverage, isLong ? 'long' : 'short', margin, capital);
+
+            // 创建订单对象
+            const order = {
+                id: Date.now(),
+                coin: coin.toUpperCase(),
+                direction: isLong ? 'Long' : 'Short',
+                leverage,
+                entry,
+                stopLoss: stopLoss || 0,
+                takeProfit: takeProfit || 0,
+                margin,
+                liquidationPrice: liquidationPrices.isolated,
+                crossLiquidationPrice: liquidationPrices.cross,
+                positionSize: margin * leverage,
+                createTime: new Date().toISOString()
+            };
+
+            // 计算潜在盈亏
+            if (order.stopLoss) {
+                order.potentialLoss = calculatePotentialLoss(order);
+            }
+            if (order.takeProfit) {
+                order.potentialProfit = calculatePotentialProfit(order);
+            }
+
+            // 使用固定比例法验证风险
+            if (order.stopLoss) {
+                const actualRisk = order.potentialLoss / capital;
+                if (actualRisk > riskProfile.riskPerTrade) {
+                    const message = currentLang === 'zh'
+                        ? `该订单风险(${(actualRisk * 100).toFixed(1)}%)超过设定的单笔风险限制(${(riskProfile.riskPerTrade * 100).toFixed(0)}%)`
+                        : `Order risk (${(actualRisk * 100).toFixed(1)}%) exceeds limit (${(riskProfile.riskPerTrade * 100).toFixed(0)}%)`;
+                    showAlert(message, 'warning');
+                }
+            }
+
+            orders.push(order);
+            updateOrdersTable();
+            updateAccountInfo();
+            updateCharts();
+            autoSave();
+            showAlert(t('orderAdded'), 'success');
+
+            // 清空输入
+            document.getElementById('entry').value = '';
+            document.getElementById('stopLoss').value = '';
+            document.getElementById('takeProfit').value = '';
+            document.getElementById('margin').value = '';
+        }
+
+        // 计算潜在损失
+        function calculatePotentialLoss(order) {
+            if (!order.stopLoss) return order.margin;
+            
+            const priceChange = order.direction === 'Long' 
+                ? (order.stopLoss - order.entry) / order.entry
+                : (order.entry - order.stopLoss) / order.entry;
+            
+            const loss = Math.abs(priceChange * order.positionSize);
+            return Math.min(loss, order.margin);
+        }
+
+        // 计算潜在盈利
+        function calculatePotentialProfit(order) {
+            if (!order.takeProfit) return 0;
+            
+            const priceChange = order.direction === 'Long'
+                ? (order.takeProfit - order.entry) / order.entry
+                : (order.entry - order.takeProfit) / order.entry;
+            
+            return Math.max(0, priceChange * order.positionSize);
+        }
+
+        // 更新订单表格
+        function updateOrdersTable() {
+            const tbody = document.getElementById('ordersTableBody');
+            
+            if (orders.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: #a0a0a0;" data-i18n="noOrders">${t('noOrders')}</td></tr>`;
+                return;
+            }
+
+            const isolatedText = currentLang === 'zh' ? '逐仓' : 'Isolated';
+            const crossText = currentLang === 'zh' ? '全仓' : 'Cross';
+
+            tbody.innerHTML = orders.map(order => `
+                <tr>
+                    <td>${order.coin}</td>
+                    <td><span class="tag ${order.direction === 'Long' ? 'tag-long' : 'tag-short'}">${order.direction}</span></td>
+                    <td>${order.leverage}x</td>
+                    <td>$${order.entry.toFixed(2)}</td>
+                    <td>${order.stopLoss ? '$' + order.stopLoss.toFixed(2) : '-'}</td>
+                    <td>${order.takeProfit ? '$' + order.takeProfit.toFixed(2) : '-'}</td>
+                    <td>$${order.margin.toFixed(2)}</td>
+                    <td>
+                        <div class="liquidation-prices">
+                            <div class="liq-price liq-isolated">${isolatedText}: $${order.liquidationPrice.toFixed(2)}</div>
+                            <div class="liq-price liq-cross">${crossText}: $${(order.crossLiquidationPrice || order.liquidationPrice).toFixed(2)}</div>
+                        </div>
+                    </td>
+                    <td>
+                        <button class="btn-edit" onclick="editOrder(${order.id})">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn-delete" onclick="deleteOrder(${order.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // 删除订单
+        function deleteOrder(id) {
+            if (confirm(t('deleteConfirm'))) {
+                orders = orders.filter(order => order.id !== id);
+                updateOrdersTable();
+                updateAccountInfo();
+                updateCharts();
+                if (orders.length > 0) {
+                    calculateComprehensiveRisk();
+                }
+                showAlert(t('orderDeleted'), 'success');
+            }
+        }
+
+        // 编辑订单
+        function editOrder(id) {
+            const order = orders.find(o => o.id === id);
+            if (!order) return;
+
+            document.getElementById('editOrderId').value = id;
+            document.getElementById('editCoin').value = order.coin;
+            document.getElementById('editLeverage').value = order.leverage;
+            document.getElementById('editEntry').value = order.entry;
+            document.getElementById('editStopLoss').value = order.stopLoss || '';
+            document.getElementById('editTakeProfit').value = order.takeProfit || '';
+            document.getElementById('editMargin').value = order.margin;
+
+            document.getElementById('editModal').style.display = 'block';
+        }
+
+        // 保存编辑的订单
+        function saveEditOrder() {
+            const id = parseInt(document.getElementById('editOrderId').value);
+            const order = orders.find(o => o.id === id);
+            if (!order) return;
+
+            const newMargin = parseFloat(document.getElementById('editMargin').value);
+            const capital = parseFloat(document.getElementById('capital').value);
+            const totalUsedMargin = orders.reduce((sum, o) => o.id === id ? sum : sum + o.margin, 0);
+            
+            if (totalUsedMargin + newMargin > capital) {
+                showAlert(t('marginExceedsBalance'), 'danger');
+                return;
+            }
+
+            order.coin = document.getElementById('editCoin').value;
+            order.leverage = parseFloat(document.getElementById('editLeverage').value);
+            order.entry = parseFloat(document.getElementById('editEntry').value);
+            order.stopLoss = parseFloat(document.getElementById('editStopLoss').value) || 0;
+            order.takeProfit = parseFloat(document.getElementById('editTakeProfit').value) || 0;
+            order.margin = newMargin;
+
+            const liquidationPrices = calculateLiquidationPrice(order.entry, order.leverage, order.direction, order.margin, capital);
+            order.liquidationPrice = liquidationPrices.isolated;
+            order.crossLiquidationPrice = liquidationPrices.cross;
+            order.positionSize = order.margin * order.leverage;
+            
+            if (order.stopLoss) {
+                order.potentialLoss = calculatePotentialLoss(order);
+            }
+            if (order.takeProfit) {
+                order.potentialProfit = calculatePotentialProfit(order);
+            }
+
+            updateOrdersTable();
+            updateAccountInfo();
+            updateCharts();
+            calculateComprehensiveRisk();
+            closeModal();
+            showAlert(t('orderUpdated'), 'success');
+        }
+
+        // 关闭模态框
+        function closeModal() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+
+        // 计算综合风险
+        function calculateComprehensiveRisk() {
+            if (orders.length === 0) {
+                showAlert(currentLang === 'zh' ? '请先添加订单' : 'Please add orders first', 'warning');
+                return;
+            }
+
+            const capital = parseFloat(document.getElementById('capital').value);
+            const riskProfile = RISK_PROFILES[document.getElementById('riskTolerance').value];
+
+            // 基础指标计算
+            const totalMargin = orders.reduce((sum, order) => sum + order.margin, 0);
+            const marginRatio = (totalMargin / capital) * 100;
+            const totalExposure = orders.reduce((sum, order) => sum + order.positionSize, 0);
+            const maxPotentialLoss = orders.reduce((sum, order) => sum + (order.potentialLoss || order.margin), 0);
+
+            // 更新基础指标显示
+            const percentText = currentLang === 'zh' ? '占总资金' : '% of Capital';
+            
+            const totalMarginIndicator = document.getElementById('totalMarginIndicator');
+            totalMarginIndicator.innerHTML = `
+                <div class="label">${t('totalMargin')}</div>
+                <div class="value">$${totalMargin.toFixed(2)}</div>
+                <div class="description">${percentText}: ${marginRatio.toFixed(1)}%</div>
+            `;
+
+            const marginIndicator = document.getElementById('marginRatioIndicator');
+            marginIndicator.className = 'indicator';
+            if (marginRatio > 80) marginIndicator.classList.add('danger');
+            else if (marginRatio > 50) marginIndicator.classList.add('warning');
+            else marginIndicator.classList.add('success');
+            
+            marginIndicator.innerHTML = `
+                <div class="label">${t('marginUsage')}</div>
+                <div class="value">${marginRatio.toFixed(1)}%</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: ${Math.min(marginRatio, 100)}%"></div>
+                </div>
+            `;
+
+            document.getElementById('totalExposureIndicator').innerHTML = `
+                <div class="label">${t('totalExposure')}</div>
+                <div class="value">$${totalExposure.toFixed(2)}</div>
+                <div class="description">${t('leveragedValue')}</div>
+            `;
+
+            const maxLossIndicator = document.getElementById('maxLossIndicator');
+            maxLossIndicator.className = 'indicator';
+            const lossRatio = (maxPotentialLoss / capital) * 100;
+            if (lossRatio > 20) maxLossIndicator.classList.add('danger');
+            else if (lossRatio > 10) maxLossIndicator.classList.add('warning');
+            else maxLossIndicator.classList.add('success');
+            
+            maxLossIndicator.innerHTML = `
+                <div class="label">${t('maxPotentialLoss')}</div>
+                <div class="value">-$${maxPotentialLoss.toFixed(2)}</div>
+                <div class="description">${percentText}: ${lossRatio.toFixed(1)}%</div>
+            `;
+
+            // 计算高级风险指标
+            const advancedMetrics = calculateAdvancedMetrics(orders, capital);
+            
+            // 更新高级指标显示
+            document.getElementById('varValue').textContent = `-$${advancedMetrics.var95.toFixed(2)} (${(advancedMetrics.var95/capital*100).toFixed(1)}%)`;
+            document.getElementById('maxDrawdown').textContent = `${advancedMetrics.maxDrawdown.toFixed(1)}%`;
+            document.getElementById('profitLossRatio').textContent = advancedMetrics.profitLossRatio.toFixed(2);
+            document.getElementById('fixedFractionSuggestion').textContent = advancedMetrics.fixedFractionSuggestion;
+            document.getElementById('correlationRisk').textContent = getRiskLevel(advancedMetrics.correlationRisk);
+            document.getElementById('riskAdjustedReturn').textContent = `${advancedMetrics.riskAdjustedReturn.toFixed(1)}%`;
+
+            // 更新图表
+            updateChartsWithCapital(capital);
+
+            // 生成智能建议
+            generateRecommendations(totalMargin, marginRatio, maxPotentialLoss, capital, advancedMetrics, riskProfile);
+        }
+
+        // 计算高级风险指标
+        function calculateAdvancedMetrics(orders, capital) {
+            // VaR计算
+            const returns = orders.map(order => {
+                const loss = order.potentialLoss || order.margin;
+                return -loss / capital;
+            });
+            const sortedReturns = returns.sort((a, b) => a - b);
+            const var95Index = Math.floor(sortedReturns.length * 0.05);
+            const var95 = Math.abs(sortedReturns[var95Index] || 0) * capital;
+
+            // 最大回撤
+            const maxDrawdown = calculateMaxDrawdown(orders, capital);
+
+            // 盈亏比
+            const totalProfit = orders.reduce((sum, order) => sum + (order.potentialProfit || 0), 0);
+            const totalLoss = orders.reduce((sum, order) => sum + (order.potentialLoss || order.margin), 0);
+            const profitLossRatio = totalLoss > 0 ? totalProfit / totalLoss : 0;
+
+            // 固定比例法建议
+            const fixedFractionSuggestion = calculateFixedFractionSuggestion(orders, capital);
+
+            // 相关性风险
+            const correlationRisk = calculateCorrelationRisk(orders);
+
+            // 风险调整收益
+            const expectedReturn = orders.reduce((sum, order) => {
+                const profit = order.potentialProfit || 0;
+                const loss = order.potentialLoss || order.margin;
+                return sum + (profit - loss) / capital;
+            }, 0);
+            
+            const volatility = calculateVolatility(orders, capital);
+            const riskAdjustedReturn = expectedReturn * 100 * (1 - Math.min(volatility, 1));
+
+            return {
+                var95,
+                maxDrawdown,
+                profitLossRatio,
+                fixedFractionSuggestion,
+                correlationRisk,
+                riskAdjustedReturn
+            };
+        }
+
+        // 计算固定比例法建议
+        function calculateFixedFractionSuggestion(orders, capital) {
+            const riskProfile = RISK_PROFILES[document.getElementById('riskTolerance').value];
+            const targetRisk = riskProfile.riskPerTrade;
+            
+            const avgRisk = orders.reduce((sum, order) => {
+                const risk = (order.potentialLoss || order.margin) / capital;
+                return sum + risk;
+            }, 0) / orders.length;
+            
+            let suggestion;
+            if (currentLang === 'zh') {
+                if (avgRisk > targetRisk * 1.5) {
+                    suggestion = `风险过高，建议减仓${((avgRisk - targetRisk) * 100).toFixed(1)}%`;
+                } else if (avgRisk < targetRisk * 0.5) {
+                    suggestion = `风险偏低，可增仓${((targetRisk - avgRisk) * 100).toFixed(1)}%`;
+                } else {
+                    suggestion = `风险适中(${(avgRisk * 100).toFixed(1)}%)`;
+                }
+            } else {
+                if (avgRisk > targetRisk * 1.5) {
+                    suggestion = `Risk too high, reduce ${((avgRisk - targetRisk) * 100).toFixed(1)}%`;
+                } else if (avgRisk < targetRisk * 0.5) {
+                    suggestion = `Risk low, can add ${((targetRisk - avgRisk) * 100).toFixed(1)}%`;
+                } else {
+                    suggestion = `Risk moderate (${(avgRisk * 100).toFixed(1)}%)`;
+                }
+            }
+            
+            return suggestion;
+        }
+
+        // 计算最大回撤
+        function calculateMaxDrawdown(orders, capital) {
+            let currentCapital = capital;
+            let peak = capital;
+            let maxDrawdown = 0;
+
+            orders.forEach(order => {
+                const loss = order.potentialLoss || order.margin;
+                currentCapital -= loss;
+                const drawdown = ((peak - currentCapital) / peak) * 100;
+                maxDrawdown = Math.max(maxDrawdown, drawdown);
+                
+                const profit = order.potentialProfit || 0;
+                currentCapital += profit;
+                peak = Math.max(peak, currentCapital);
+            });
+
+            return maxDrawdown;
+        }
+
+        // 计算波动率
+        function calculateVolatility(orders, capital) {
+            const returns = orders.map(order => {
+                const profit = order.potentialProfit || 0;
+                const loss = order.potentialLoss || order.margin;
+                return (profit - loss) / capital;
+            });
+
+            if (returns.length === 0) return 0;
+
+            const mean = returns.reduce((a, b) => a + b, 0) / returns.length;
+            const variance = returns.reduce((sum, r) => sum + Math.pow(r - mean, 2), 0) / returns.length;
+            return Math.sqrt(variance);
+        }
+
+        // 计算相关性风险
+        function calculateCorrelationRisk(orders) {
+            if (orders.length === 0) return 0;
+
+            let correlationScore = 0;
+
+            const longOrders = orders.filter(o => o.direction === 'Long').length;
+            const shortOrders = orders.filter(o => o.direction === 'Short').length;
+            const directionBalance = Math.abs(longOrders - shortOrders) / orders.length;
+            correlationScore += directionBalance * 0.4;
+
+            const coinGroups = {};
+            orders.forEach(order => {
+                coinGroups[order.coin] = (coinGroups[order.coin] || 0) + 1;
+            });
+            const uniqueCoins = Object.keys(coinGroups).length;
+            const diversification = 1 - (uniqueCoins / orders.length);
+            correlationScore += diversification * 0.3;
+
+            const highLeverageOrders = orders.filter(o => o.leverage > 10).length;
+            const leverageRisk = highLeverageOrders / orders.length;
+            correlationScore += leverageRisk * 0.3;
+
+            return Math.min(1, correlationScore);
+        }
+
+        // 获取风险等级描述
+        function getRiskLevel(value) {
+            if (currentLang === 'zh') {
+                if (value < 0.3) return '低';
+                if (value < 0.6) return '中';
+                if (value < 0.8) return '高';
+                return '极高';
+            } else {
+                if (value < 0.3) return 'Low';
+                if (value < 0.6) return 'Medium';
+                if (value < 0.8) return 'High';
+                return 'Very High';
+            }
+        }
+
+        // 生成智能建议
+        function generateRecommendations(totalMargin, marginRatio, maxLoss, capital, metrics, riskProfile) {
+            const recommendations = [];
+            
+            // 根据语言生成建议
+            if (currentLang === 'zh') {
+                generateChineseRecommendations(recommendations, totalMargin, marginRatio, maxLoss, capital, metrics, riskProfile);
+            } else {
+                generateEnglishRecommendations(recommendations, totalMargin, marginRatio, maxLoss, capital, metrics, riskProfile);
+            }
+
+            // 更新建议显示
+            const recommendationsHtml = recommendations.map(rec => {
+                return `<li class="${rec.type}">${rec.text}</li>`;
+            }).join('');
+
+            document.getElementById('riskRecommendations').innerHTML = `
+                <ul class="recommendation-list">${recommendationsHtml}</ul>
+            `;
+        }
+
+        // 生成中文建议
+        function generateChineseRecommendations(recommendations, totalMargin, marginRatio, maxLoss, capital, metrics, riskProfile) {
+            if (marginRatio > 80) {
+                recommendations.push({
+                    type: 'danger',
+                    text: `保证金使用率过高(${marginRatio.toFixed(1)}%)，强平风险极大！建议立即减仓`
+                });
+            } else if (marginRatio > riskProfile.maxMarginRatio * 100) {
+                recommendations.push({
+                    type: 'warning',
+                    text: `保证金使用率(${marginRatio.toFixed(1)}%)超过风险偏好限制(${riskProfile.maxMarginRatio * 100}%)`
+                });
+            } else if (marginRatio < 30) {
+                recommendations.push({
+                    type: 'success',
+                    text: `保证金使用率合理(${marginRatio.toFixed(1)}%)，风险可控`
+                });
+            }
+
+            const avgRiskPerTrade = orders.reduce((sum, order) => {
+                return sum + (order.potentialLoss || order.margin) / capital;
+            }, 0) / orders.length;
+            
+            if (avgRiskPerTrade > riskProfile.riskPerTrade * 1.5) {
+                recommendations.push({
+                    type: 'danger',
+                    text: `平均单笔风险(${(avgRiskPerTrade * 100).toFixed(1)}%)超过固定比例法建议的${(riskProfile.riskPerTrade * 100).toFixed(0)}%，请降低仓位`
+                });
+            }
+
+            const lossRatio = (maxLoss / capital) * 100;
+            if (lossRatio > 20) {
+                recommendations.push({
+                    type: 'danger',
+                    text: `总潜在损失(${lossRatio.toFixed(1)}%)过高，建议分批减仓或设置更严格的止损`
+                });
+            }
+
+            if (metrics.profitLossRatio < 1) {
+                recommendations.push({
+                    type: 'danger',
+                    text: `盈亏比过低(${metrics.profitLossRatio.toFixed(2)})，潜在盈利小于潜在亏损`
+                });
+            }
+
+            recommendations.push({
+                type: 'info',
+                text: `根据固定比例法，每笔交易风险应控制在账户的${(riskProfile.riskPerTrade * 100).toFixed(0)}%以内`
+            });
+        }
+
+        // 生成英文建议
+        function generateEnglishRecommendations(recommendations, totalMargin, marginRatio, maxLoss, capital, metrics, riskProfile) {
+            if (marginRatio > 80) {
+                recommendations.push({
+                    type: 'danger',
+                    text: `Margin usage too high (${marginRatio.toFixed(1)}%), extreme liquidation risk! Reduce position immediately`
+                });
+            } else if (marginRatio > riskProfile.maxMarginRatio * 100) {
+                recommendations.push({
+                    type: 'warning',
+                    text: `Margin usage (${marginRatio.toFixed(1)}%) exceeds risk preference limit (${riskProfile.maxMarginRatio * 100}%)`
+                });
+            } else if (marginRatio < 30) {
+                recommendations.push({
+                    type: 'success',
+                    text: `Margin usage reasonable (${marginRatio.toFixed(1)}%), risk under control`
+                });
+            }
+
+            const avgRiskPerTrade = orders.reduce((sum, order) => {
+                return sum + (order.potentialLoss || order.margin) / capital;
+            }, 0) / orders.length;
+            
+            if (avgRiskPerTrade > riskProfile.riskPerTrade * 1.5) {
+                recommendations.push({
+                    type: 'danger',
+                    text: `Average risk per trade (${(avgRiskPerTrade * 100).toFixed(1)}%) exceeds fixed fraction suggestion of ${(riskProfile.riskPerTrade * 100).toFixed(0)}%, please reduce position`
+                });
+            }
+
+            const lossRatio = (maxLoss / capital) * 100;
+            if (lossRatio > 20) {
+                recommendations.push({
+                    type: 'danger',
+                    text: `Total potential loss (${lossRatio.toFixed(1)}%) too high, consider reducing positions or tighter stops`
+                });
+            }
+
+            if (metrics.profitLossRatio < 1) {
+                recommendations.push({
+                    type: 'danger',
+                    text: `P/L ratio too low (${metrics.profitLossRatio.toFixed(2)}), potential profit less than potential loss`
+                });
+            }
+
+            recommendations.push({
+                type: 'info',
+                text: `Based on fixed fraction method, risk per trade should be kept within ${(riskProfile.riskPerTrade * 100).toFixed(0)}% of account`
+            });
+        }
+
+        // 更新图表
+        function updateChartsWithCapital(capital) {
+            if (!capital || capital <= 0) {
+                updateCharts();
+                return;
+            }
+
+            const totalMargin = orders.reduce((sum, order) => sum + order.margin, 0);
+            const availableBalance = capital - totalMargin;
+            
+            const coinMargins = {};
+            orders.forEach(order => {
+                const key = `${order.coin} (${order.direction})`;
+                coinMargins[key] = (coinMargins[key] || 0) + order.margin;
+            });
+
+            const labels = [
+                currentLang === 'zh' ? '可用余额' : 'Available',
+                ...Object.keys(coinMargins)
+            ];
+            const data = [availableBalance, ...Object.values(coinMargins)];
+            
+            const colors = ['#4caf50'];
+            Object.keys(coinMargins).forEach((key, index) => {
+                if (key.includes('Long')) {
+                    colors.push(`rgba(0, 200, 83, ${0.8 - index * 0.1})`);
+                } else {
+                    colors.push(`rgba(255, 61, 0, ${0.8 - index * 0.1})`);
+                }
+            });
+
+            positionChart.data.labels = labels;
+            positionChart.data.datasets[0].data = data;
+            positionChart.data.datasets[0].backgroundColor = colors;
+            positionChart.update();
+
+            const chartLabels = orders.map(o => `${o.coin} ${o.leverage}x`);
+            const losses = orders.map(o => o.potentialLoss || o.margin);
+            const profits = orders.map(o => o.potentialProfit || 0);
+
+            riskChart.data.labels = chartLabels;
+            riskChart.data.datasets[0].data = losses;
+            riskChart.data.datasets[1].data = profits;
+            riskChart.update();
+        }
+
+        // 更新图表
+        function updateCharts() {
+            if (orders.length === 0) {
+                const capital = parseFloat(document.getElementById('capital').value) || 10000;
+                
+                positionChart.data.labels = [currentLang === 'zh' ? '可用余额' : 'Available'];
+                positionChart.data.datasets[0].data = [capital];
+                positionChart.data.datasets[0].backgroundColor = ['#4caf50'];
+                positionChart.update();
+
+                riskChart.data.labels = [];
+                riskChart.data.datasets[0].data = [];
+                riskChart.data.datasets[1].data = [];
+                riskChart.update();
+                return;
+            }
+
+            const capital = parseFloat(document.getElementById('capital').value);
+            updateChartsWithCapital(capital);
+        }
+
+        // 显示提示信息
+        function showAlert(message, type = 'info') {
+            const alertBox = document.getElementById('alertBox');
+            const alertId = Date.now();
+            
+            const alertHtml = `
+                <div class="alert ${type}" id="alert-${alertId}">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'danger' ? 'exclamation-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'}"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            alertBox.insertAdjacentHTML('beforeend', alertHtml);
+            
+            setTimeout(() => {
+                const alertElement = document.getElementById(`alert-${alertId}`);
+                if (alertElement) {
+                    alertElement.style.animation = 'slideOut 0.3s ease';
+                    setTimeout(() => alertElement.remove(), 300);
+                }
+            }, 3000);
+        }
+
+        // 重置所有数据
+        function resetAll() {
+            if (confirm(t('resetConfirm'))) {
+                orders = [];
+                document.getElementById('capital').value = 10000;
+                document.getElementById('riskTolerance').value = 'moderate';
+                updateOrdersTable();
+                updateAccountInfo();
+                updateCharts();
+                
+                // 重置显示
+                const percentText = currentLang === 'zh' ? '占总资金' : '% of Capital';
+                
+                document.getElementById('totalMarginIndicator').innerHTML = `
+                    <div class="label">${t('totalMargin')}</div>
+                    <div class="value">0 USDT</div>
+                    <div class="description">${percentText}: 0%</div>
+                `;
+                document.getElementById('marginRatioIndicator').innerHTML = `
+                    <div class="label">${t('marginUsage')}</div>
+                    <div class="value">0%</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 0%"></div>
+                    </div>
+                `;
+                document.getElementById('totalExposureIndicator').innerHTML = `
+                    <div class="label">${t('totalExposure')}</div>
+                    <div class="value">0 USDT</div>
+                    <div class="description">${t('leveragedValue')}</div>
+                `;
+                document.getElementById('maxLossIndicator').innerHTML = `
+                    <div class="label">${t('maxPotentialLoss')}</div>
+                    <div class="value">0 USDT</div>
+                    <div class="description">${percentText}: 0%</div>
+                `;
+                
+                document.getElementById('varValue').textContent = '-';
+                document.getElementById('maxDrawdown').textContent = '-';
+                document.getElementById('profitLossRatio').textContent = '-';
+                document.getElementById('fixedFractionSuggestion').textContent = '-';
+                document.getElementById('correlationRisk').textContent = '-';
+                document.getElementById('riskAdjustedReturn').textContent = '-';
+                
+                document.getElementById('riskRecommendations').innerHTML = `
+                    <ul class="recommendation-list">
+                        <li class="success">${t('systemReady')}</li>
+                    </ul>
+                `;
+                
+                localStorage.removeItem('tradingOrders');
+                localStorage.removeItem('tradingSettings');
+                
+                showAlert(t('dataReset'), 'success');
+            }
+        }
+
+        // 导出为JSON
+        function exportToJSON() {
+            const capital = parseFloat(document.getElementById('capital').value);
+            const data = {
+                version: '2.5',
+                exportTime: new Date().toISOString(),
+                settings: {
+                    capital: capital,
+                    riskTolerance: document.getElementById('riskTolerance').value,
+                    language: currentLang
+                },
+                orders: orders,
+                metrics: orders.length > 0 ? calculateAdvancedMetrics(orders, capital) : null,
+                summary: {
+                    totalMargin: orders.reduce((sum, o) => sum + o.margin, 0),
+                    availableBalance: capital - orders.reduce((sum, o) => sum + o.margin, 0),
+                    totalExposure: orders.reduce((sum, o) => sum + o.positionSize, 0),
+                    maxPotentialLoss: orders.reduce((sum, o) => sum + (o.potentialLoss || o.margin), 0)
+                }
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `trading_risk_${new Date().getTime()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            showAlert(t('dataExported'), 'success');
+        }
+
+        // 导出为CSV
+        function exportToCSV() {
+            if (orders.length === 0) {
+                showAlert(t('noData'), 'warning');
+                return;
+            }
+            
+            const capital = parseFloat(document.getElementById('capital').value);
+            const headers = currentLang === 'zh' 
+                ? ['交易对', '方向', '杠杆', '开仓价格', '止损价', '止盈价', '保证金', '保证金占比', '逐仓强平价', '全仓强平价', '持仓价值', '潜在损失', '潜在盈利']
+                : ['Pair', 'Direction', 'Leverage', 'Entry', 'Stop Loss', 'Take Profit', 'Margin', 'Margin %', 'Isolated Liq', 'Cross Liq', 'Position Size', 'Potential Loss', 'Potential Profit'];
+                
+            const rows = orders.map(order => [
+                order.coin,
+                order.direction,
+                order.leverage,
+                order.entry,
+                order.stopLoss || '',
+                order.takeProfit || '',
+                order.margin,
+                ((order.margin / capital) * 100).toFixed(2) + '%',
+                order.liquidationPrice.toFixed(2),
+                (order.crossLiquidationPrice || order.liquidationPrice).toFixed(2),
+                order.positionSize.toFixed(2),
+                (order.potentialLoss || 0).toFixed(2),
+                (order.potentialProfit || 0).toFixed(2)
+            ]);
+            
+            const totalMargin = orders.reduce((sum, o) => sum + o.margin, 0);
+            const totalExposure = orders.reduce((sum, o) => sum + o.positionSize, 0);
+            const totalLoss = orders.reduce((sum, o) => sum + (o.potentialLoss || 0), 0);
+            const totalProfit = orders.reduce((sum, o) => sum + (o.potentialProfit || 0), 0);
+            
+            rows.push([]);
+            const summaryLabel = currentLang === 'zh' ? '汇总' : 'Summary';
+            rows.push([summaryLabel, '', '', '', '', '', totalMargin.toFixed(2), ((totalMargin/capital)*100).toFixed(2)+'%', '', '', totalExposure.toFixed(2), totalLoss.toFixed(2), totalProfit.toFixed(2)]);
+            
+            const csv = [headers, ...rows].map(row => row.join(',')).join('\n');
+            const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `trading_orders_${new Date().getTime()}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            showAlert(t('dataExported'), 'success');
+        }
+
+        // 保存到本地存储
+        function saveToLocal() {
+            const data = {
+                orders: orders,
+                settings: {
+                    capital: document.getElementById('capital').value,
+                    riskTolerance: document.getElementById('riskTolerance').value,
+                    language: currentLang
+                }
+            };
+            
+            localStorage.setItem('tradingOrders', JSON.stringify(data.orders));
+            localStorage.setItem('tradingSettings', JSON.stringify(data.settings));
+            
+            showAlert(t('dataSaved'), 'success');
+        }
+
+        // 从本地存储加载
+        function loadFromLocal(showMessage = true) {
+            try {
+                const savedOrders = localStorage.getItem('tradingOrders');
+                const savedSettings = localStorage.getItem('tradingSettings');
+                
+                if (savedOrders) {
+                    orders = JSON.parse(savedOrders);
+                    const capital = parseFloat(document.getElementById('capital').value);
+                    orders.forEach(order => {
+                        if (!order.crossLiquidationPrice) {
+                            const liquidationPrices = calculateLiquidationPrice(
+                                order.entry,
+                                order.leverage,
+                                order.direction,
+                                order.margin,
+                                capital
+                            );
+                            order.crossLiquidationPrice = liquidationPrices.cross;
+                        }
+                    });
+                    updateOrdersTable();
+                }
+                
+                if (savedSettings) {
+                    const settings = JSON.parse(savedSettings);
+                    document.getElementById('capital').value = settings.capital || 10000;
+                    document.getElementById('riskTolerance').value = settings.riskTolerance || 'moderate';
+                    if (settings.language) {
+                        setLanguage(settings.language);
+                    }
+                }
+                
+                updateAccountInfo();
+                updateCharts();
+                
+                if (showMessage) {
+                    showAlert(t('dataLoaded'), 'success');
+                    if (orders.length > 0) {
+                        calculateComprehensiveRisk();
+                    }
+                }
+            } catch (error) {
+                console.error('加载数据失败:', error);
+                if (showMessage) {
+                    showAlert(currentLang === 'zh' ? '加载数据失败' : 'Failed to load data', 'danger');
+                }
+            }
+        }
+
+        // 自动保存
+        function autoSave() {
+            saveToLocal();
+        }
+    </script>
+</body>
+</html>
